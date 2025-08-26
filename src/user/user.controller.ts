@@ -7,6 +7,15 @@ import { Public } from 'src/common/decorator/decorator';
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
+  // Nếu Postman gửi JSON có chữ data thì dùng thế này
+  // @Public()
+  // @Post('register')
+  // register(@Body() body: { data:{ user_name: string, password: string, email: string, role: string }}) {
+  //   const { user_name, password, email, role } = body.data;
+  //   return this.userService.registerUser(user_name, password, email, role);
+  // }
+
+  // Nếu Postman gửi JSON ko chữ data thì dùng thế này
   @Public()
   @Post('register')
   register(@Body() body: { user_name: string, password: string, email: string, role: string }) {
@@ -17,7 +26,7 @@ export class UserController {
   @Post('getMe')
   getMe(@Body() body: { user_name: string }) {
     const { user_name } = body;
-    return this.userService.getMe({user_name});
+    return this.userService.getMe({ user_name });
   }
 
   @Get('getAllUser')
