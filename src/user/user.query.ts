@@ -67,4 +67,14 @@ export const UserQuery = {
        `
     },
 
+    getDataProduction: (work_date) => {
+        return `SELECT  WORK_DATE 
+                        ,FACTORY_CODE   
+                        ,TOTAL_QTY
+                FROM    DSH_MGR.INF_SAP_PP_PRODUCTION
+                WHERE   WORK_DATE ='${work_date}'
+                ORDER BY TOTAL_QTY
+                `
+    }
+
 }

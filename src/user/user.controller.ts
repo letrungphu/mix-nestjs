@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus } from '@nestjs/common';
 import { UserService } from './user.service';
 import { errorResponse, successResponse } from 'src/common/helpers/response';
 import { Public } from 'src/common/decorator/decorator';
@@ -79,23 +79,10 @@ export class UserController {
     const listNamee = await this.userService.getNameDailyAttendance({ name, work_date });
     const listDeptt = await this.userService.getDeptDailyAttendance({ name, work_date });
 
-
     const responseData = {
       listName: listNamee,
       listDept: listDeptt
     }
-
-    // const hasError = listNamee?.statusCode && listNamee.statusCode !== 200 ||
-    //   listDeptt?.statusCode && listDeptt.statusCode !== 200;
-
-
-    // if (hasError) {
-    //   return {
-    //     statusCode: 100,
-    //     message: 'Failed',
-    //     data: responseData
-    //   };
-    // }
 
     const isListNameError = listNamee?.statusCode && listNamee.statusCode !== 200;
     const isListDeptError = listDeptt?.statusCode && listDeptt.statusCode !== 200;
@@ -110,4 +97,25 @@ export class UserController {
 
     return successResponse(responseData);
   }
+
+  @Post('getDataProduction')
+  async getDataProduction(@Body() body: { work_date: string}) {
+    const {work_date} = body;
+
+    const listProduction = await this.userService.getDataProduction({work_date});
+    // console.log('listProduction: ', listProduction);
+
+    const isListDataLoadPlanError = listProduction?.statusCode && listProduction.statusCode !== 200;
+
+    if (isListDataLoadPlanError) {
+      return {
+        statusCode: 100,
+        message: 'Failed',
+        data: []
+      };
+    }
+
+    return successResponse(listProduction);
+  }
+
 }

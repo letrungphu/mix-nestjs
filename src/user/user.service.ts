@@ -20,7 +20,7 @@ export class UserService {
 
   async onModuleInit() {
     try {
-      const oracleClientDir = path.join(__dirname, '../../instantclient_11_2'); 
+      const oracleClientDir = path.join(__dirname, '../../instantclient_11_2');
       console.log('>>> ', oracleClientDir);
       oracle.initOracleClient({
         // libDir: 'D:\\instantclient_11_2', // Đường dẫn đến Instant Client 11g
@@ -60,11 +60,11 @@ export class UserService {
     } catch (error) {
       return errorResponse(error.errorNum || 500);
     }
-    
+
     // return (rows as UserRow[]).map(UserMapper.toUserDTO);
   }
 
-  async registerUser( user_name, password, email, role ) {
+  async registerUser(user_name, password, email, role) {
     const saltOrRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltOrRounds);
     const sql = UserQuery.resgisterUser(user_name, hashedPassword, email, role);
@@ -157,12 +157,35 @@ export class UserService {
     try {
       connection = await this.oraclePool.getConnection();
       const result = await connection.execute(sql, [], { outFormat: oracle.OUT_FORMAT_OBJECT });
-
       const rows = result.rows ?? [];
 
       return rows
     } catch (err) {
       return errorResponse(err.errorNum || 500);
+    } finally {
+      if (connection) {
+        try {
+          await connection.close();
+        } catch (err) {
+          console.error('Error closing connection: ', err);
+          return err;
+        }
+      }
+    }
+  }
+
+  async getDataProduction({ work_date }) {
+    const sql = UserQuery.getDataProduction(work_date);
+    console.log('>>> sql: ', sql);
+    let connection;
+    try {
+      connection = await this.oraclePool.getConnection();
+      const result = await connection.execute(sql, [], { outFormat: oracle.OUT_FORMAT_OBJECT });
+      const rows = result.rows ?? [];
+
+      return rows;
+    } catch (err) {
+      return errorResponse(err.errNum || 500);
     } finally {
       if (connection) {
         try {
