@@ -1,11 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, Inject } from '@nestjs/common';
 import { UserService } from './user.service';
 import { errorResponse, successResponse } from 'src/common/helpers/response';
 import { Public } from 'src/common/decorator/decorator';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { buildCacheKey } from 'src/common/helpers/redis_cache_key';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) { }
+  constructor(private readonly userService: UserService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) { }
 
   // Nếu Postman gửi JSON có chữ data thì dùng thế này
   // @Public()
@@ -98,12 +102,37 @@ export class UserController {
     return successResponse(responseData);
   }
 
-  @Post('getDataProduction')
-  async getDataProduction(@Body() body: { work_date: string}) {
-    const {work_date} = body;
+  // @Post('getDataProduction')
+  // async getDataProduction(@Body() body: { work_date: string}) {
+  //   const {work_date} = body;
 
-    const listProduction = await this.userService.getDataProduction({work_date});
-    // console.log('listProduction: ', listProduction);
+  //   const listProduction = await this.userService.getDataProduction({work_date});
+
+  //   const isListDataLoadPlanError = listProduction?.statusCode && listProduction.statusCode !== 200;
+
+  //   if (isListDataLoadPlanError) {
+  //     return {
+  //       statusCode: 100,
+  //       message: 'Failed',
+  //       data: []
+  //     };
+  //   }
+  //   return successResponse(listProduction);
+  // }
+
+  @Post('getDataProduction')
+  async getDataProduction(@Body() body: { work_date: string }) {
+    const { work_date } = body;
+
+    // const cacheKey = `production:${work_date}`;
+    const cacheKey = buildCacheKey('production-list', {work_date});
+    const cachedData = await this.cacheManager.get(cacheKey);
+    if (cachedData) {
+      console.log(">>> get from Redis Cache");
+      return successResponse(cachedData);
+    }
+
+    const listProduction = await this.userService.getDataProduction({ work_date });
 
     const isListDataLoadPlanError = listProduction?.statusCode && listProduction.statusCode !== 200;
 
@@ -114,6 +143,9 @@ export class UserController {
         data: []
       };
     }
+
+    // Lưu vào Redis cache cho lần sau
+    await this.cacheManager.set(cacheKey, listProduction, { ttl: 60 * 5 } as any); // cache 5 phút
 
     return successResponse(listProduction);
   }

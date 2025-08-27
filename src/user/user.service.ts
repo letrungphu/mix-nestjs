@@ -176,11 +176,12 @@ export class UserService {
 
   async getDataProduction({ work_date }) {
     const sql = UserQuery.getDataProduction(work_date);
-    console.log('>>> sql: ', sql);
+
     let connection;
     try {
       connection = await this.oraclePool.getConnection();
       const result = await connection.execute(sql, [], { outFormat: oracle.OUT_FORMAT_OBJECT });
+
       const rows = result.rows ?? [];
 
       return rows;
