@@ -9,21 +9,22 @@ export const UserQuery = {
        `
     },
 
-    getMe: (user_name: string) => {
-        return `SELECT  user_name
-                        ,password 
-                        ,email  
-                        ,role              
+    getMe: (email: string) => {
+        return `SELECT  email
+                        ,user_name
+                        ,password  
+                        ,role     
+                        ,birthday         
                 FROM    user 
                 WHERE   1 = 1
-                AND     user_name = '${user_name}'
+                AND     email = '${email}'
        `
     },
 
-    resgisterUser: (user_name, password, email, role) => {
-        return `INSERT INTO user(user_name, password, email, role)
+    resgisterUser: (email, password, user_name, role, birthday) => {
+        return `INSERT INTO user(email, password, user_name, role, birthday)
                 VALUES
-                ('${user_name}', '${password}', '${email}', '${role}')
+                ('${email}', '${password}', '${user_name}', '${role}', '${birthday}')
        `
     },
 

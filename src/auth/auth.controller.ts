@@ -10,17 +10,18 @@ export class AuthController {
     @Public()
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    async signIn(@Body() body: { user_name: string, password: string }) {
+    async logIn(@Body() body: { user_name: string, password: string }) {
         const { user_name, password } = body;
-        return this.authService.signIn(user_name, password);
+        return this.authService.logIn(user_name, password);
     }
 
     // @Public()
     // @HttpCode(HttpStatus.OK)
     // @Post('register')
-    // register(@Body() body: { user_name, password, email, role }) {
-    //     const { user_name, password, email, role } = body;
-    //     return this.authService.register(user_name, password, email, role);
+    // register(@Body() body: { email, user_name, password, role, birthday }) {
+    //     const { email, user_name, password, role, birthday } = body;
+    //     console.log(">>>>>");
+    //     return this.authService.register(email, user_name, password, role, birthday);
     // }
 
     // @UseGuards(AuthGuard)

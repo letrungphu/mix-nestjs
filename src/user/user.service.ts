@@ -64,14 +64,15 @@ export class UserService {
     // return (rows as UserRow[]).map(UserMapper.toUserDTO);
   }
 
-  async registerUser(user_name, password, email, role) {
+  async registerUser(email, password, user_name, role, birthday) {
     const saltOrRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltOrRounds);
-    const sql = UserQuery.resgisterUser(user_name, hashedPassword, email, role);
+    const sql = UserQuery.resgisterUser(email, hashedPassword, user_name, role, birthday);
     try {
       const [register] = await this.mysqlPool.query<mysql.ResultSetHeader>(sql);
+
       if (register.affectedRows > 0) {
-        const profile = UserQuery.getMe(user_name);
+        const profile = UserQuery.getMe(email);
 
         const [resultProfile] = await this.mysqlPool.query(profile);
 
@@ -87,8 +88,8 @@ export class UserService {
     }
   }
 
-  async getMe(user_name: any) {
-    const sql = UserQuery.getMe(user_name);
+  async getMe(email: any) {
+    const sql = UserQuery.getMe(email);
     try {
       const [rows] = await this.mysqlPool.query(sql);
       return rows;

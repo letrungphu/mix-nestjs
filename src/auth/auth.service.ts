@@ -10,8 +10,8 @@ export class AuthService {
         private jwtService: JwtService
     ) { }
 
-    async signIn(user_name: string, pass: string): Promise<any> {
-        const user = await this.userService.getMe(user_name);
+    async logIn(email: string, pass: string): Promise<any> {
+        const user = await this.userService.getMe(email);
 
         if (!user[0]) {
             throw new UnauthorizedException('Wrong user or pass');
@@ -23,7 +23,7 @@ export class AuthService {
             throw new UnauthorizedException('Invalid Credentials');
         }
 
-        const payload = { sub: user[0]?.user_name, email: user[0]?.email };
+        const payload = { sub: user[0]?.email, email: user[0]?.user_name };
         // return successResponse({
         //     user:user[0],
         //     access_token: await this.jwtService.signAsync(payload),
@@ -37,11 +37,11 @@ export class AuthService {
         // access_token: await this.jwtService.signAsync(payload),
     }
 
-    // async register(user_name: string, password: string, email: string, role: string): Promise<any> {
+    // async register(email: string, user_name: string, password: string, role: string, birthday: string): Promise<any> {
     //     const saltOrRounds = 10;
     //     const hashedPassword = await bcrypt.hash(password, saltOrRounds);
 
-    //     const result = await this.userService.registerUser({ user_name, password: hashedPassword, email, role });
+    //     const result = await this.userService.registerUser(email, user_name, password, role, birthday);
     //     console.log('result; ', result);
 
     //     return result;

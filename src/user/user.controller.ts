@@ -22,9 +22,9 @@ export class UserController {
   // Nếu Postman gửi JSON ko chữ data thì dùng thế này
   @Public()
   @Post('register')
-  register(@Body() body: { user_name: string, password: string, email: string, role: string }) {
-    const { user_name, password, email, role } = body;
-    return this.userService.registerUser(user_name, password, email, role);
+  register(@Body() body: { email: string, password: string, user_name: string, role: string, birthday:string }) {
+    const { email, password, user_name, role, birthday } = body;
+    return this.userService.registerUser(email, password, user_name, role, birthday);
   }
 
   @Post('getMe')
