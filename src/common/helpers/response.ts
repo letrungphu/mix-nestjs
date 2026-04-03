@@ -40,7 +40,10 @@ export function successResponse(data: any = {}) {
     };
 }
 
-export function errorResponse(errorCode: number = 500) {
+export function errorResponse(errorCode: number = 500, error?: any) {
+    if (error) {
+        console.error(error);
+    }
     return {
         statusCode: errorCode,
         message: getMessage(errorCode),
@@ -48,12 +51,34 @@ export function errorResponse(errorCode: number = 500) {
     };
 }
 
+// export function errorResponse(errorCode: number = 500) {
+//     return {
+//         statusCode: errorCode,
+//         message: getMessage(errorCode),
+//         data: [],
+//     };
+// }
+
 function getMessage(statusCode: number): string {
     return STATUS_MESSAGES[statusCode] || 'Unknown Error';
 }
 
-function convertKeyToLowerCase(obj: Record<string, any>): Record<string, any> {
-    return Object.fromEntries(
-        Object.entries(obj).map(([KeyboardEvent, value]) => [KeyboardEvent.toLowerCase(), value])
-    );
+function convertKeyToLowerCase(obj: any): any {
+    if (Array.isArray(obj)) {
+        return obj.map(convertKeyToLowerCase);
+    } else if (obj !== null && typeof obj === 'object') {
+        return Object.fromEntries(
+            Object.entries(obj).map(([key, value]) => [
+                key.toLowerCase(),
+                convertKeyToLowerCase(value)
+            ])
+        );
+    }
+    return obj;
 }
+
+// function convertKeyToLowerCase(obj: Record<string, any>): Record<string, any> {
+//     return Object.fromEntries(
+//         Object.entries(obj).map(([key, value]) => [key.toLowerCase(), value])
+//     );
+// }

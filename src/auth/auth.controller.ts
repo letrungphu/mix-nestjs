@@ -10,9 +10,9 @@ export class AuthController {
     @Public()
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    async logIn(@Body() body: { user_name: string, password: string }) {
-        const { user_name, password } = body;
-        return this.authService.logIn(user_name, password);
+    async logIn(@Body() body: { email: string, password: string }) {
+        const { email, password } = body;
+        return this.authService.logIn(email, password);
     }
 
     // @Public()

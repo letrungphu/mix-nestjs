@@ -10,29 +10,26 @@ export class AuthService {
         private jwtService: JwtService
     ) { }
 
-    async logIn(email: string, pass: string): Promise<any> {
-        const user = await this.userService.getMe(email);
+    async logIn(emaill: string, pass: string): Promise<any> {
+        const email = await this.userService.getMe(emaill);
 
-        if (!user[0]) {
+        if (!email[0]) {
             throw new UnauthorizedException('Wrong user or pass');
         }
 
-        const isPasswordValid = await bcrypt.compare(pass, user[0].password);
+        const isPasswordValid = await bcrypt.compare(pass, email[0].password);
 
         if (!isPasswordValid) {
             throw new UnauthorizedException('Invalid Credentials');
         }
 
-        const payload = { sub: user[0]?.email, email: user[0]?.user_name };
-        // return successResponse({
-        //     user:user[0],
-        //     access_token: await this.jwtService.signAsync(payload),
-        // });
+        const payload = { sub: email[0]?.email, user: email[0]?.user_name };
+
         return {
             access_token: await this.jwtService.signAsync(payload),
             statusCode: 200,
             message: 'Success',
-            data: user[0],
+            data: email[0],
         }
         // access_token: await this.jwtService.signAsync(payload),
     }

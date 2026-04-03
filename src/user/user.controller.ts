@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, Inject } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpStatus, Inject, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { errorResponse, successResponse } from 'src/common/helpers/response';
 import { Public } from 'src/common/decorator/decorator';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { buildCacheKey } from 'src/common/helpers/redis_cache_key';
+import { AuthGuard } from 'src/auth/auth.guard';
 
 @Controller('user')
 export class UserController {
@@ -22,15 +23,22 @@ export class UserController {
   // Nếu Postman gửi JSON ko chữ data thì dùng thế này
   @Public()
   @Post('register')
-  register(@Body() body: { email: string, password: string, user_name: string, role: string, birthday:string }) {
+  register(@Body() body: { email: string, password: string, user_name: string, role: string, birthday: string }) {
     const { email, password, user_name, role, birthday } = body;
     return this.userService.registerUser(email, password, user_name, role, birthday);
   }
 
   @Post('getMe')
-  getMe(@Body() body: { user_name: string }) {
-    const { user_name } = body;
-    return this.userService.getMe({ user_name });
+  getMe(@Body() body: { email: string }) {
+    const { email } = body;
+    return this.userService.getMe( email );
+  }
+
+  // @UseGuards(AuthGuard)
+  @Post('updateProfile')
+  updateProfile(@Body() body: { data: { user_name: string, birthday: string, email: string } }) {
+    const { user_name, birthday, email } = body.data;
+    return this.userService.updateProfile(user_name, birthday, email);
   }
 
   @Get('getAllUser')
@@ -125,11 +133,12 @@ export class UserController {
     const { work_date } = body;
 
     // const cacheKey = `production:${work_date}`;
-    const cacheKey = buildCacheKey('production-list', {work_date});
+    const cacheKey = buildCacheKey('production-list', { work_date });
     const cachedData = await this.cacheManager.get(cacheKey);
     if (cachedData) {
       console.log(">>> get from Redis Cache");
-      return successResponse(cachedData);
+      // return successResponse(cachedData);
+      return cachedData;
     }
 
     const listProduction = await this.userService.getDataProduction({ work_date });
@@ -147,7 +156,8 @@ export class UserController {
     // Lưu vào Redis cache cho lần sau
     await this.cacheManager.set(cacheKey, listProduction, { ttl: 60 * 5 } as any); // cache 5 phút
 
-    return successResponse(listProduction);
+    // return successResponse(listProduction);
+    return listProduction;
   }
 
 }

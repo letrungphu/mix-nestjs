@@ -28,6 +28,14 @@ export const UserQuery = {
        `
     },
 
+    updateProfile:(user_name, birthday, email) => {
+        return `UPDATE  user
+                SET     user_name = '${user_name}'
+                        ,birthday = '${birthday}'
+                WHERE   email = '${email}'
+                `
+    },
+
     getUserCondition1: (id, email) => {
         return `SELECT  email
                         ,password                
